@@ -21,12 +21,12 @@ public class ConcurrentAStar : IPathSearchingAlgo
             if (currentVertice.OwnIndex == EndPoint)
                 return true;
 
-            foreach ((int adjIndex, float distance) in _graph.GetAdjacentVertices(currentVertice.OwnIndex))
+            foreach (int adjIndex in _graph.GetAdjacentVertices(currentVertice.OwnIndex))
             {
                 Vertice child = _graph[adjIndex];
                 if (child.TryUpdateMinRoute(currentVertice.OwnIndex))
                 {
-                    verticeQueue.Enqueue(adjIndex, child.DistanceFromStart+child.Heuristic);
+                    verticeQueue.Enqueue(adjIndex, child.DistanceFromStart+child.Heuristic!.Value);
                 }
             }
         }

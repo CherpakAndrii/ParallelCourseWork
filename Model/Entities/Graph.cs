@@ -16,6 +16,14 @@ public partial class Graph
         WeightMatrix = BuildWeightMatrix(Vertices, _adjMatrix);
     }
 
+    public void Reset()
+    {
+        foreach (var v in Vertices)
+        {
+            v.Reset();
+        }
+    }
+
     public Graph(string sourceFilePath)
     {
         (bool[][] _adjMatrix, (int, int)[] coordinates) = ReadFromFile(sourceFilePath);
@@ -27,7 +35,7 @@ public partial class Graph
         WeightMatrix = BuildWeightMatrix(Vertices, _adjMatrix);
     }
 
-    public IEnumerable<(int, float)> GetAdjacentVertices(int fromVertice)
+    public IEnumerable<int> GetAdjacentVertices(int fromVertice)
     {
         if (!IndexIsInRange(fromVertice))
             throw new IndexOutOfRangeException("Vertice index is out of matrix");
@@ -36,7 +44,7 @@ public partial class Graph
         for (int i = 0; i < targetRow.Length; i++)
         {
             if (targetRow[i] >= 0)
-                yield return (i, targetRow[i]);
+                yield return i;
         }
     }
 

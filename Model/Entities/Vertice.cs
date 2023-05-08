@@ -4,9 +4,9 @@ public partial class Vertice
 {
     public float DistanceFromStart { get; set; }
     public Coordinates VerticeCoordinates { get; }
-    public float Heuristic { get; private set; }
+    public float? Heuristic { get; private set; }
     public int PreviousVerticeInRouteIndex { get; set; }
-    public bool IsPassed { get; set; }
+    public bool IsPassed;
     
     public int OwnIndex;
     private Graph _graph;
@@ -41,5 +41,13 @@ public partial class Vertice
     {
         Heuristic = (float)Math.Sqrt(Math.Pow(VerticeCoordinates.X - finish.VerticeCoordinates.X, 2) +
                               Math.Pow(VerticeCoordinates.Y - finish.VerticeCoordinates.Y, 2));
+    }
+
+    public void Reset()
+    {
+        DistanceFromStart = float.MaxValue / 2;
+        PreviousVerticeInRouteIndex = -1;
+        Heuristic = null;
+        IsPassed = false;
     }
 }
