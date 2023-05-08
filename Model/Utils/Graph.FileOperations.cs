@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ParallelAStar.model;
+namespace Model.Entities;
 
 public partial class Graph
 {

@@ -1,6 +1,4 @@
-﻿using ParallelAStar.model;
-
-namespace ParallelAStar.utils;
+﻿namespace Model.Entities;
 
 public static class GraphGenerator
 {
@@ -25,7 +23,7 @@ public static class GraphGenerator
         return matrix;
     }
 
-    public static Vertice[] GenerateVertices(int verticeNumber, Graph graph)
+    public static Vertice[] GenerateVertices(int verticeNumber, Entities.Graph graph)
     {
         Vertice[] vertices = new Vertice[verticeNumber];
         Random random = new Random();

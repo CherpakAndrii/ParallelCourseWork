@@ -1,32 +1,32 @@
-﻿namespace ParallelAStar.model;
+﻿namespace Model.Entities;
 
 public partial class Vertice
 {
-    public double DistanceFromStart { get; set; }
+    public float DistanceFromStart { get; set; }
     public Coordinates VerticeCoordinates { get; }
-    public double Heuristic { get; private set; }
+    public float Heuristic { get; private set; }
     public int PreviousVerticeInRouteIndex { get; set; }
     public bool IsPassed { get; set; }
     
-    private int _ownIndex;
+    public int OwnIndex;
     private Graph _graph;
 
     public Vertice(Graph graph, int ownIndex, (int x, int y) coordinates)
     {
         VerticeCoordinates = new Coordinates(coordinates);
-        DistanceFromStart = int.MaxValue/2;
+        DistanceFromStart = float.MaxValue/2;
         PreviousVerticeInRouteIndex = -1;
         IsPassed = false;
-        _ownIndex = ownIndex;
+        OwnIndex = ownIndex;
         _graph = graph;
     }
 
     public bool TryUpdateMinRoute(int fromVerticeIndex)
     {
-        if (IsPassed || _graph[fromVerticeIndex, _ownIndex] == -1)
+        if (IsPassed || _graph[fromVerticeIndex, OwnIndex] == -1)
             return false;
 
-        double newDistance = _graph[fromVerticeIndex, _ownIndex] + _graph[fromVerticeIndex].DistanceFromStart;
+        float newDistance = _graph[fromVerticeIndex, OwnIndex] + _graph[fromVerticeIndex].DistanceFromStart;
         if (DistanceFromStart > newDistance)
         {
             DistanceFromStart = newDistance;
@@ -39,7 +39,7 @@ public partial class Vertice
 
     public void SetHeuristic(Vertice finish)
     {
-        Heuristic = Math.Sqrt(Math.Pow(VerticeCoordinates.X - finish.VerticeCoordinates.X, 2) +
+        Heuristic = (float)Math.Sqrt(Math.Pow(VerticeCoordinates.X - finish.VerticeCoordinates.X, 2) +
                               Math.Pow(VerticeCoordinates.Y - finish.VerticeCoordinates.Y, 2));
     }
 }

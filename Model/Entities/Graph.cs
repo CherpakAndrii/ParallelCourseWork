@@ -1,11 +1,10 @@
-﻿using ParallelAStar.utils;
-
-namespace ParallelAStar.model;
+﻿namespace Model.Entities;
 
 public partial class Graph
 {
-    public double[][] WeightMatrix { get; set; }
+    public float[][] WeightMatrix { get; set; }
     public Vertice[] Vertices { get; }
+    public int FinishVerticeIndex { get; private set; }
 
     public Graph(int size)
     {
@@ -28,7 +27,7 @@ public partial class Graph
         WeightMatrix = BuildWeightMatrix(Vertices, _adjMatrix);
     }
 
-    public IEnumerable<(int, double)> GetAdjacentVertices(int fromVertice)
+    public IEnumerable<(int, float)> GetAdjacentVertices(int fromVertice)
     {
         if (!IndexIsInRange(fromVertice))
             throw new IndexOutOfRangeException("Vertice index is out of matrix");
@@ -46,13 +45,22 @@ public partial class Graph
         get => Vertices[ind];
     }
 
-    public double this[int vertice1, int vertice2]
+    public float this[int vertice1, int vertice2]
     {
         get
         {
             if (!IndexIsInRange(vertice1) || !IndexIsInRange(vertice2))
                 throw new IndexOutOfRangeException("Vertice index is out of matrix");
             return WeightMatrix[vertice1][vertice2];
+        }
+    }
+
+    public void SetEndPoint(int endPointIndex)
+    {
+        FinishVerticeIndex = endPointIndex;
+        foreach (var vertice in Vertices)
+        {
+            vertice.SetHeuristic(Vertices[endPointIndex]);
         }
     }
 

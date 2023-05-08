@@ -1,4 +1,4 @@
-﻿namespace ParallelAStar.model;
+﻿namespace Model.Entities;
 
 public partial class Vertice
 {

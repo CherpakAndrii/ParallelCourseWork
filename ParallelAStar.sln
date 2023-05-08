@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParallelAStar", "ParallelAStar\ParallelAStar.csproj", "{7854AA1D-56A1-4CC6-89BE-8A055FFD4CD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{7854AA1D-56A1-4CC6-89BE-8A055FFD4CD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{6368C0AC-2D67-4645-8F59-88A9EDCF4DBC}"
 EndProject
