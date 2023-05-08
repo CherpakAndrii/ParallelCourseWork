@@ -6,4 +6,19 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Update="DataStructures\BlockingPriorityQueue.Enumerator.cs">
+        <DependentUpon>BlockingPriorityQueue.cs</DependentUpon>
+      </Compile>
+      <Compile Update="DataStructures\Enumerator.cs">
+        <DependentUpon>Heap.cs</DependentUpon>
+      </Compile>
+      <Compile Update="DataStructures\IPriorityQueue.Node.cs">
+        <DependentUpon>IPriorityQueue.cs</DependentUpon>
+      </Compile>
+      <Compile Update="DataStructures\PriorityQueue.Enumerator.cs">
+        <DependentUpon>PriorityQueue.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>

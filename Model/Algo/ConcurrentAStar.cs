@@ -1,4 +1,5 @@
-﻿using Model.Entities;
+﻿using Model.DataStructures;
+using Model.Entities;
 
 namespace Model.Algo;
 
@@ -8,7 +9,7 @@ public class ConcurrentAStar : IPathSearchingAlgo
 
     public override bool SearchPath()
     {
-        PriorityQueue<int, float> verticeQueue = new PriorityQueue<int, float>();
+        PriorityQueue<int> verticeQueue = new PriorityQueue<int>();
         verticeQueue.Enqueue(StartPoint, 0);
         Vertice currentVertice;
         while (verticeQueue.Count > 0)
@@ -31,6 +32,6 @@ public class ConcurrentAStar : IPathSearchingAlgo
             }
         }
 
-        return true;
+        return false;
     }
 }

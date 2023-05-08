@@ -12,8 +12,11 @@ public partial class Graph
             throw new ArgumentException("The graph must contain at least 3 vertices!");
 
         Vertices = GraphGenerator.GenerateVertices(size, this);
+        Console.WriteLine("Vertices generated!");
         bool[][] _adjMatrix = GraphGenerator.GenerateAdjacenceMatrix(size);
+        Console.WriteLine("Adj matrix generated!");
         WeightMatrix = BuildWeightMatrix(Vertices, _adjMatrix);
+        Console.WriteLine("Weight matrix built!");
     }
 
     public void Reset()
