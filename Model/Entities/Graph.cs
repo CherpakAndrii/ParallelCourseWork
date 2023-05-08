@@ -13,7 +13,7 @@ public partial class Graph
 
         Vertices = GraphGenerator.GenerateVertices(size, this);
         Console.WriteLine("Vertices generated!");
-        bool[][] _adjMatrix = GraphGenerator.GenerateAdjacenceMatrix(size);
+        bool[][] _adjMatrix = GraphGenerator.GenerateAdjacenceMatrix(size, 0.3f);
         Console.WriteLine("Adj matrix generated!");
         WeightMatrix = BuildWeightMatrix(Vertices, _adjMatrix);
         Console.WriteLine("Weight matrix built!");
@@ -21,30 +21,35 @@ public partial class Graph
 
     public void Reset()
     {
-        foreach (var v in Vertices)
-        {
-            v.Reset();
-        }
+        Parallel.ForEach(Vertices, v => v.Reset());
+    }
+    
+    public enum FileType
+    {
+        Binary,
+        Text
     }
 
-    public Graph(string sourceFilePath)
+    public Graph(string sourceFilePath, FileType fileType)
     {
-        (bool[][] _adjMatrix, (int, int)[] coordinates) = ReadFromFile(sourceFilePath);
+        (bool[][] adjMatrix, (int, int)[] coordinates) = fileType == FileType.Text
+            ? ReadFromTxtFile(sourceFilePath)
+            : ReadFromBinFile(sourceFilePath);
         Vertices = new Vertice[coordinates.Length];
         for (int i = 0; i < coordinates.Length; i++)
         {
             Vertices[i] = new Vertice(this, i, coordinates[i]);
         }
-        WeightMatrix = BuildWeightMatrix(Vertices, _adjMatrix);
+        WeightMatrix = BuildWeightMatrix(Vertices, adjMatrix);
     }
 
-    public IEnumerable<int> GetAdjacentVertices(int fromVertice)
+    public IEnumerable<int> GetAdjacentVertices(int fromVertice, int indexLimit = int.MaxValue)
     {
         if (!IndexIsInRange(fromVertice))
             throw new IndexOutOfRangeException("Vertice index is out of matrix");
 
         var targetRow = WeightMatrix[fromVertice];
-        for (int i = 0; i < targetRow.Length; i++)
+        for (int i = 0; i < targetRow.Length && i < indexLimit; i++)
         {
             if (targetRow[i] >= 0)
                 yield return i;
@@ -69,9 +74,17 @@ public partial class Graph
     public void SetEndPoint(int endPointIndex)
     {
         FinishVerticeIndex = endPointIndex;
-        foreach (var vertice in Vertices)
+        Vertice finish = Vertices[endPointIndex];
+        Parallel.ForEach(Vertices, vertice => vertice.SetHeuristic(finish));
+    }
+
+    public Graph(Graph original)
+    {
+        WeightMatrix = original.WeightMatrix;
+        Vertices = new Vertice[original.Vertices.Length];
+        for (int i = 0; i < Vertices.Length; i++)
         {
-            vertice.SetHeuristic(Vertices[endPointIndex]);
+            Vertices[i] = original.Vertices[i].Copy();
         }
     }
 

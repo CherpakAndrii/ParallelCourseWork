@@ -2,9 +2,9 @@
 
 public static class GraphGenerator
 {
-    public static bool[][] GenerateAdjacenceMatrix(int verticeNumber, float adjacenceCoefficient = 0.3f)
+    public static bool[][] GenerateAdjacenceMatrix(int verticeNumber, float adjacenceCoefficient = 0.001f)
     {
-        if (verticeNumber <= 2 || adjacenceCoefficient is <= 0 or >= 1)
+        if (verticeNumber <= 2 || adjacenceCoefficient is < 0 or >= 1)
             throw new ArgumentException(
                 "Incorrect arguments! Make sure that vertice number is greater than 2 and adjacence coefficient is between 0 and 1.");
         const int accuracy = 1000;

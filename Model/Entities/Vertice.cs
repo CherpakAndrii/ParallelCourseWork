@@ -21,6 +21,11 @@ public partial class Vertice
         _graph = graph;
     }
 
+    public Vertice Copy()
+    {
+        return new Vertice(_graph, OwnIndex, (VerticeCoordinates.X, VerticeCoordinates.Y));
+    }
+
     public bool TryUpdateMinRoute(int fromVerticeIndex)
     {
         if (IsPassed || _graph[fromVerticeIndex, OwnIndex] == -1)

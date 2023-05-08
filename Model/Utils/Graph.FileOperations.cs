@@ -4,7 +4,7 @@ namespace Model.Entities;
 
 public partial class Graph
 {
-    public void SaveToFile(string filePath)
+    public void SaveToTextFile(string filePath)
     {
         StringBuilder fileContent = new StringBuilder();
         foreach (var row in WeightMatrix)
@@ -26,8 +26,33 @@ public partial class Graph
         
         File.WriteAllText(filePath, fileContent.ToString());
     }
+    
+    public void SaveToBinFile(string filePath)
+    {
+        int graphSize = Vertices.Length;
+        int fileSize = 4 + graphSize * (graphSize + 8);
+        byte[] fileContent = new byte[fileSize];
+        BitConverter.GetBytes(graphSize).CopyTo(fileContent, 0);
+        int ctr = 4;
+        foreach (var row in WeightMatrix)
+        {
+            foreach (var element in row)
+            {
+                fileContent[ctr++] = (byte)(element == -1 ? 0 : 1);
+            }
+        }
+        foreach (var v in Vertices)
+        {
+            BitConverter.GetBytes(v.VerticeCoordinates.X).CopyTo(fileContent, ctr);
+            ctr += 4;
+            BitConverter.GetBytes(v.VerticeCoordinates.Y).CopyTo(fileContent, ctr);
+            ctr += 4;
+        }
+        
+        File.WriteAllBytes(filePath, fileContent);
+    }
 
-    public static (bool[][], (int, int)[]) ReadFromFile(string filePath)
+    public static (bool[][], (int, int)[]) ReadFromTxtFile(string filePath)
     {
         string[] content = File.ReadAllText(filePath).Split("////\n");
         string[] matrixLines = content[0].Split('\n', StringSplitOptions.RemoveEmptyEntries);
@@ -51,6 +76,30 @@ public partial class Graph
         {
             var coors = verticeCoordinates[i].Split(':');
             verticesCoordinates[i] = (int.Parse(coors[0]), int.Parse(coors[1]));
+        }
+
+        return (adjacenseMatrix, verticesCoordinates);
+    }
+    
+    public static (bool[][], (int, int)[]) ReadFromBinFile(string filePath)
+    {
+        BinaryReader br = new BinaryReader(new FileStream(filePath, FileMode.Open));
+        int graphSize = br.ReadInt32();
+
+        bool[][] adjacenseMatrix = new bool[graphSize][];
+        for (int i = 0; i < graphSize; i++)
+        {
+            adjacenseMatrix[i] = new bool[graphSize];
+            for (int j = 0; j < graphSize; j++)
+            {
+                adjacenseMatrix[i][j] = br.ReadBoolean();
+            }
+        }
+
+        (int, int)[] verticesCoordinates = new (int, int)[graphSize];
+        for (int i = 0; i < graphSize; i++)
+        {
+            verticesCoordinates[i] = (br.ReadInt32(), br.ReadInt32());
         }
 
         return (adjacenseMatrix, verticesCoordinates);
