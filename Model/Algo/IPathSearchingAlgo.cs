@@ -16,7 +16,7 @@ public abstract class IPathSearchingAlgo
         _graph = graph;
     }
 
-    public abstract bool SearchPath();
+    public abstract Task<bool> SearchPath();
 
     public Stack<int> TraceRoute()
     {

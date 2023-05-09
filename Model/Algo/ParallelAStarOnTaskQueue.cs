@@ -8,10 +8,10 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
 {
     public ParallelAStarOnTaskQueue(Graph graph, int startpoinIndex, int finishIndex) : base(graph, startpoinIndex, finishIndex) { }
 
-    public override bool SearchPath()
+    public async override Task<bool> SearchPath()
     {
         PriorityQueue<(int, Task<ConcurrentQueue<(int, float)>>)> verticeQueue = new PriorityQueue<(int, Task<ConcurrentQueue<(int, float)>>)>();
-        Task<ConcurrentQueue<(int, float)>> calculateChildrenTask = Task.Run(() => CalculateChildren(StartPoint));
+        Task<ConcurrentQueue<(int, float)>> calculateChildrenTask = Task.Run( () => CalculateChildren(StartPoint));
         verticeQueue.Enqueue((StartPoint, calculateChildrenTask), 0);
         Vertice currentVertice;
         while (verticeQueue.Count > 0)
@@ -25,8 +25,8 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
             if (currentVertice.OwnIndex == EndPoint)
                 return true;
 
-            calculateChildrenTask.Wait();
-            Parallel.ForEach(calculateChildrenTask.Result, indDistPair =>
+            var children = await calculateChildrenTask;
+            Parallel.ForEach(children, indDistPair =>
             {
                 Vertice child = _graph[indDistPair.Item1];
                 if (!child.IsPassed && child.DistanceFromStart > indDistPair.Item2)
@@ -34,7 +34,7 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
                     child.PreviousVerticeInRouteIndex = currentVerticeIndex;
                     child.DistanceFromStart = indDistPair.Item2;
                     Task<ConcurrentQueue<(int, float)>> calculateNextChildrenTask =
-                        Task.Run(async () => await CalculateChildren(indDistPair.Item1));
+                        Task.Run(() => CalculateChildren(indDistPair.Item1));
                     lock (verticeQueue)
                     {
                         verticeQueue.Enqueue((indDistPair.Item1, calculateNextChildrenTask),
@@ -47,7 +47,7 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
         return false;
     }
 
-    private async Task<ConcurrentQueue<(int Vertice, float newDistance)>> CalculateChildren(int parentIndex)
+    private ConcurrentQueue<(int Vertice, float newDistance)> CalculateChildren(int parentIndex)
     {
         Vertice parent = _graph[parentIndex];
         ConcurrentQueue<(int Vertice, float newDistance)> updateDistances =

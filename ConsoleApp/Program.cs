@@ -6,25 +6,25 @@ namespace ConsoleApp;
 
 public static class Program
 {
-    public static void Main()
+    public static async Task Main()
     {
-        Graph g = new Graph(10000);
-        g.SaveToBinFile("saved.grph");
+        Graph g = new Graph("saved.grph", Graph.FileType.Binary);
+        // g.SaveToBinFile("saved.grph");
         int s = 0, f = 6789;
         IPathSearchingAlgo algo = new ConcurrentAStar(g, s, f);
-        TestAlgo(algo, g, f);
+        await TestAlgo(algo, g, f);
         g.Reset();
         algo = new ParallelAStarOnWaitingTasks(g, s, f);
-        TestAlgo(algo, g, f);
+        await TestAlgo(algo, g, f);
         g.Reset();
         algo = new ParallelAStarOnTaskQueue(g, s, f);
-        TestAlgo(algo, g, f);
+        await TestAlgo(algo, g, f);
     }
 
-    static void TestAlgo(IPathSearchingAlgo algo, Graph g, int f)
+    static async Task TestAlgo(IPathSearchingAlgo algo, Graph g, int f)
     {
         Stopwatch sw = Stopwatch.StartNew();
-        bool found = algo.SearchPath();
+        bool found = await algo.SearchPath();
         sw.Stop();
         
         if (found)

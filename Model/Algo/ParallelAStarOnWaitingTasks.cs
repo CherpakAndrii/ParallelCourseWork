@@ -18,7 +18,7 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
         _queueLocker = new();
     }
 
-    public override bool SearchPath()
+    public async override Task<bool> SearchPath()
     {
         BlockingPriorityQueue<int> verticeQueue = new BlockingPriorityQueue<int>();
         verticeQueue.Enqueue(StartPoint, 0);
@@ -28,7 +28,10 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
             listeners[i] = Task.Run(() => ListenQueue(verticeQueue));
         }
 
-        Task.WaitAll(listeners);
+        foreach (var task in listeners)
+        {
+            await task;
+        }
         return PathFound;
     }
 

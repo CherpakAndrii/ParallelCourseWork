@@ -7,25 +7,21 @@ public static class Program
 {
     public static void Main()
     {
-        Graph g = new Graph(40000);
+        Graph g = new Graph(50000);
         g.SaveToBinFile("saved.grph");
         Console.WriteLine("Graph saved to file");
-        float currentMaxDist = 0;
-        (int, int) currentMostFarIndexes = (-1, -1);
-        (int ind, float dist) currentMostFar;
+        
+        List<Task<(int startInd, (int finInd, float dist) searchRes)>> tasks = new();
         for (int i = 1; i < g.Vertices.Length; i++)
         {
-            currentMostFar = GetTheMostFarPoint(new Graph(g), i);
-            if (currentMostFar.dist > currentMaxDist)
-            {
-                currentMaxDist = currentMostFar.dist;
-                currentMostFarIndexes = (i, currentMostFar.ind);
-            }
-            g.Reset();
+            tasks.Add(Task.Run(() => (i, GetTheMostFarPoint(new Graph(g), i))));
             Console.Write("\r"+i);
         }
 
-        Console.WriteLine($"{currentMostFarIndexes.Item1} --> {currentMostFarIndexes.Item2} : {currentMaxDist}");
+        Task.WaitAll(tasks.ToArray());
+        var mostFar = tasks.Select(t => t.Result).MaxBy(p => p.searchRes.dist);
+
+        Console.WriteLine($"{mostFar.startInd} --> {mostFar.searchRes.finInd} : {mostFar.searchRes.dist}");
     }
 
     static (int ind, float dist) GetTheMostFarPoint(Graph graph, int start)

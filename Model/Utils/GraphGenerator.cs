@@ -31,7 +31,7 @@ public static class GraphGenerator
     {
         Vertice[] vertices = new Vertice[verticeNumber];
         Random random = new Random();
-        int upperBoundOfCoordinates = verticeNumber * 3;
+        int upperBoundOfCoordinates = 1000;
         for (int i = 0; i < verticeNumber; i++)
         {
             vertices[i] = new Vertice(graph, i,

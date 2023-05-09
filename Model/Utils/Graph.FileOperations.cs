@@ -30,26 +30,22 @@ public partial class Graph
     public void SaveToBinFile(string filePath)
     {
         int graphSize = Vertices.Length;
-        int fileSize = 4 + graphSize * (graphSize + 8);
-        byte[] fileContent = new byte[fileSize];
-        BitConverter.GetBytes(graphSize).CopyTo(fileContent, 0);
-        int ctr = 4;
+        BinaryWriter fileContent = new BinaryWriter(new FileStream(filePath, FileMode.Create));
+        fileContent.Write(graphSize);
         foreach (var row in WeightMatrix)
         {
             foreach (var element in row)
             {
-                fileContent[ctr++] = (byte)(element == -1 ? 0 : 1);
+                fileContent.Write((byte)(element == -1 ? 0 : 1));
             }
         }
         foreach (var v in Vertices)
         {
-            BitConverter.GetBytes(v.VerticeCoordinates.X).CopyTo(fileContent, ctr);
-            ctr += 4;
-            BitConverter.GetBytes(v.VerticeCoordinates.Y).CopyTo(fileContent, ctr);
-            ctr += 4;
+            fileContent.Write(v.VerticeCoordinates.X);
+            fileContent.Write(v.VerticeCoordinates.Y);
         }
         
-        File.WriteAllBytes(filePath, fileContent);
+        fileContent.Close();
     }
 
     public static (bool[][], (int, int)[]) ReadFromTxtFile(string filePath)
