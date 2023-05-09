@@ -11,8 +11,7 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
     public override bool SearchPath()
     {
         PriorityQueue<(int, Task<ConcurrentQueue<(int, float)>>)> verticeQueue = new PriorityQueue<(int, Task<ConcurrentQueue<(int, float)>>)>();
-        Task<ConcurrentQueue<(int, float)>> calculateChildrenTask = CalculateChildren(StartPoint);
-        //calculateChildrenTask.Start();
+        Task<ConcurrentQueue<(int, float)>> calculateChildrenTask = Task.Run(() => CalculateChildren(StartPoint));
         verticeQueue.Enqueue((StartPoint, calculateChildrenTask), 0);
         Vertice currentVertice;
         while (verticeQueue.Count > 0)
@@ -26,19 +25,23 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
             if (currentVertice.OwnIndex == EndPoint)
                 return true;
 
-            foreach ((int adjIndex, float distance) in calculateChildrenTask.Result)
+            calculateChildrenTask.Wait();
+            Parallel.ForEach(calculateChildrenTask.Result, indDistPair =>
             {
-                Vertice child = _graph[adjIndex];
-                if (!child.IsPassed && child.DistanceFromStart > distance)
+                Vertice child = _graph[indDistPair.Item1];
+                if (!child.IsPassed && child.DistanceFromStart > indDistPair.Item2)
                 {
                     child.PreviousVerticeInRouteIndex = currentVerticeIndex;
-                    child.DistanceFromStart = distance;
-                    Task<ConcurrentQueue<(int, float)>> calculateNextChildrenTask = CalculateChildren(adjIndex);
-                    //calculateNextChildrenTask.Start();
-                    
-                    verticeQueue.Enqueue((adjIndex, calculateNextChildrenTask), child.DistanceFromStart+child.Heuristic!.Value);
+                    child.DistanceFromStart = indDistPair.Item2;
+                    Task<ConcurrentQueue<(int, float)>> calculateNextChildrenTask =
+                        Task.Run(async () => await CalculateChildren(indDistPair.Item1));
+                    lock (verticeQueue)
+                    {
+                        verticeQueue.Enqueue((indDistPair.Item1, calculateNextChildrenTask),
+                            child.DistanceFromStart + child.Heuristic!.Value);
+                    }
                 }
-            }
+            });
         }
 
         return false;

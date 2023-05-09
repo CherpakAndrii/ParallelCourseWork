@@ -25,7 +25,7 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
         Task[] listeners = new Task[NumberOfThreads];
         for (int i = 0; i < NumberOfThreads; i++)
         {
-            listeners[i] = ListenQueue(verticeQueue);
+            listeners[i] = Task.Run(() => ListenQueue(verticeQueue));
         }
 
         Task.WaitAll(listeners);
@@ -34,29 +34,18 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
 
     private async Task ListenQueue(BlockingPriorityQueue<int> queue)
     {
-        while (queue.Count > 0 || _workingTasks > 0)
+        Vertice current;
+        while ((queue.Count > 0 || _workingTasks > 0) && !PathFound)
         {
-            Vertice current;
-            while (!Monitor.TryEnter(_queueLocker))
+            lock (_queueLocker)
             {
-                Monitor.Wait(_queueLocker);
-            }
-
-            try
-            {
-                if (PathFound)
+                if (queue.Count == 0)
                 {
-                    Monitor.PulseAll(_queueLocker);
-                    return;
+                    Monitor.Wait(_queueLocker);
+                    continue;
                 }
-                if (queue.Count == 0) continue;
                 current = _graph[queue.Dequeue()];
                 Interlocked.Increment(ref _workingTasks);
-            }
-            finally
-            {
-                Monitor.PulseAll(_queueLocker);
-                Monitor.Exit(_queueLocker);
             }
 
             if (current.IsPassed)
@@ -78,16 +67,19 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
                 Vertice child = _graph[adjIndex];
                 if (child.TryUpdateMinRoute(current.OwnIndex))
                 {
-                    queue.Enqueue(adjIndex, child.DistanceFromStart+child.Heuristic!.Value);
-                    if (Monitor.TryEnter(_queueLocker))
+                    lock (_queueLocker)
                     {
+                        queue.Enqueue(adjIndex, child.DistanceFromStart+child.Heuristic!.Value);
                         Monitor.PulseAll(_queueLocker);
-                        Monitor.Exit(_queueLocker);
                     }
                 }
             }
             
             Interlocked.Decrement(ref _workingTasks);
+        }
+        lock (_queueLocker)
+        {
+            Monitor.PulseAll(_queueLocker);
         }
     }
 }
