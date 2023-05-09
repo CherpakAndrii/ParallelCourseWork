@@ -36,28 +36,10 @@ public partial class BlockingPriorityQueue<T> : IPriorityQueue<T> where T : ICom
 
     public bool Contains(T item)
     {
-        bool contains = false;
-        while (!Monitor.TryEnter(queueLock))
+        lock (queueLock)
         {
-            Monitor.Wait(queueLock, new TimeSpan(0, 0, 10));
+            return _heap.Contains((item, short.MaxValue));
         }
-
-        try
-        {
-            contains = _heap.Contains((item, short.MaxValue));
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            contains = default;
-        }
-        finally
-        {
-            Monitor.Exit(queueLock);
-            Monitor.PulseAll(queueLock);
-        }
-
-        return contains;
     }
 
     public void CopyTo(T[] array, int arrayIndex)
@@ -67,51 +49,19 @@ public partial class BlockingPriorityQueue<T> : IPriorityQueue<T> where T : ICom
 
     public bool Remove(T item)
     {
-        bool removed = false;
-        while (!Monitor.TryEnter(queueLock))
+        lock (queueLock)
         {
-            Monitor.Wait(queueLock, new TimeSpan(0, 0, 10));
+            return _heap.Remove((item, short.MaxValue));
         }
-
-        try
-        {
-            removed = _heap.Remove((item, short.MaxValue));
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            removed = default;
-        }
-        finally
-        {
-            Monitor.Exit(queueLock);
-            Monitor.PulseAll(queueLock);
-        }
-
-        return removed;
     }
     
     public void Enqueue(T value, float priority) => Enqueue((value, priority));
 
     public void Enqueue((T, float) item)
     {
-        while (!Monitor.TryEnter(queueLock))
-        {
-            Monitor.Wait(queueLock, new TimeSpan(0, 0, 10));
-        }
-
-        try
+        lock (queueLock)
         {
             _heap.Add(item);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
-        finally
-        {
-            Monitor.PulseAll(queueLock);
-            Monitor.Exit(queueLock);
         }
     }
     
@@ -119,53 +69,18 @@ public partial class BlockingPriorityQueue<T> : IPriorityQueue<T> where T : ICom
 
     public bool EnqueueWithReplacement((T, float) item)
     {
-        bool replaced = false;
-        while (!Monitor.TryEnter(queueLock))
+        lock (queueLock)
         {
-            Monitor.Wait(queueLock, new TimeSpan(0, 0, 10));
+            return _heap.AddWithReplacement(item);
         }
-
-        try
-        {
-            replaced = _heap.AddWithReplacement(item);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            replaced = default;
-        }
-        finally
-        {
-            Monitor.Exit(queueLock);
-            Monitor.PulseAll(queueLock);
-        }
-
-        return replaced;
     }
 
     public T Dequeue()
     {
-        T data;
-        while (!Monitor.TryEnter(queueLock))
+        lock (queueLock)
         {
-            Monitor.Wait(queueLock, new TimeSpan(0, 0, 10));
+            return _heap.Pop().Data;
         }
-        try
-        {
-            data = _heap.Pop().Data;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            data = default;
-        }
-        finally
-        {
-            Monitor.PulseAll(queueLock);
-            Monitor.Exit(queueLock);
-        }
-        
-        return data;
     }
 
     public int Count => _heap.Count;

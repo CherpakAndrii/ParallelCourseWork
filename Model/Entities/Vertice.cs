@@ -32,13 +32,15 @@ public partial class Vertice
             return false;
 
         float newDistance = _graph[fromVerticeIndex, OwnIndex] + _graph[fromVerticeIndex].DistanceFromStart;
-        if (DistanceFromStart > newDistance)
+        lock (this)
         {
-            DistanceFromStart = newDistance;
-            PreviousVerticeInRouteIndex = fromVerticeIndex;
-            return true;
+            if (DistanceFromStart > newDistance)
+            {
+                DistanceFromStart = newDistance;
+                PreviousVerticeInRouteIndex = fromVerticeIndex;
+                return true;
+            }
         }
-
         return false;
     }
 
