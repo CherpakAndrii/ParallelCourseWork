@@ -28,10 +28,8 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
             listeners[i] = Task.Run(() => ListenQueue(verticeQueue));
         }
 
-        foreach (var task in listeners)
-        {
-            await task;
-        }
+        await Task.WhenAll(listeners);
+
         return PathFound;
     }
 
