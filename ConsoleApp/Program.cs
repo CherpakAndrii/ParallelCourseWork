@@ -13,7 +13,7 @@ public static class Program
         int s = 0, f = 6789;
         IPathSearchingAlgo algo = new ConcurrentAStar(g, s, f);
         await TestAlgo(algo, g, f);
-        g.Reset();
+        /*g.Reset();
         algo = new ConcurrentAStarWithParallelFor(g, s, f);
         await TestAlgo(algo, g, f);
         g.Reset();
@@ -21,12 +21,14 @@ public static class Program
         await TestAlgo(algo, g, f);
         g.Reset();
         algo = new ParallelAStarOnTaskQueue(g, s, f);
+        await TestAlgo(algo, g, f);*/
+        g.Reset();
+        algo = new ParallelAStarOnTaskQueueOptimized(g, s, f);
         await TestAlgo(algo, g, f);
     }
 
     static async Task TestAlgo(IPathSearchingAlgo algo, Graph g, int f)
     {
-        int childsCalculated = 0;
         Stopwatch sw = Stopwatch.StartNew();
         bool found = await algo.SearchPath();
         sw.Stop();
