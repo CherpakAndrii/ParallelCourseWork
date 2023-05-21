@@ -25,6 +25,7 @@ public class ConcurrentAStar : IPathSearchingAlgo
             foreach (int adjIndex in _graph.GetAdjacentVertices(currentVertice.OwnIndex))
             {
                 Vertice child = _graph[adjIndex];
+                ChildrenCalculatedCounter++;
                 if (child.TryUpdateMinRoute(currentVertice.OwnIndex))
                 {
                     verticeQueue.Enqueue(adjIndex, child.DistanceFromStart+child.Heuristic!.Value);

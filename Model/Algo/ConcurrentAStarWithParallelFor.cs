@@ -22,13 +22,17 @@ public class ConcurrentAStarWithParallelFor : IPathSearchingAlgo
             if (currentVertice.OwnIndex == EndPoint)
                 return true;
 
-            Parallel.ForEach(_graph.GetAdjacentVertices(currentVertice.OwnIndex), adjIndex =>
+            await Task.Run(() =>
             {
-                Vertice child = _graph[adjIndex];
-                if (child.TryUpdateMinRoute(currentVertice.OwnIndex))
+                Parallel.ForEach(_graph.GetAdjacentVertices(currentVertice.OwnIndex), adjIndex =>
                 {
-                    verticeQueue.Enqueue(adjIndex, child.DistanceFromStart + child.Heuristic!.Value);
-                }
+                    Vertice child = _graph[adjIndex];
+                    Interlocked.Increment(ref ChildrenCalculatedCounter);
+                    if (child.TryUpdateMinRoute(currentVertice.OwnIndex))
+                    {
+                        verticeQueue.Enqueue(adjIndex, child.DistanceFromStart + child.Heuristic!.Value);
+                    }
+                });
             });
         }
 

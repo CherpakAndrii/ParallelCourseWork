@@ -26,6 +26,7 @@ public static class Program
 
     static async Task TestAlgo(IPathSearchingAlgo algo, Graph g, int f)
     {
+        int childsCalculated = 0;
         Stopwatch sw = Stopwatch.StartNew();
         bool found = await algo.SearchPath();
         sw.Stop();
@@ -33,9 +34,9 @@ public static class Program
         if (found)
         {
             var route = algo.TraceRoute();
-            Console.WriteLine($"found: {g[f].DistanceFromStart} ({route.Count}) in {sw.ElapsedMilliseconds}ms");
+            Console.WriteLine($"found: {g[f].DistanceFromStart} ({route.Count}) in {sw.ElapsedMilliseconds}ms with {algo.ChildrenCalculatedCounter} vertices touched");
         }
         else
-            Console.WriteLine($"Not found in {sw.ElapsedMilliseconds}ms");
+            Console.WriteLine($"Not found in {sw.ElapsedMilliseconds}ms with {algo.ChildrenCalculatedCounter} vertices touched");
     }
 }

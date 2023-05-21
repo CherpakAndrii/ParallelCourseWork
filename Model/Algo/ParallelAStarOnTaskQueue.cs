@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using Model.DataStructures;
+﻿using Model.DataStructures;
 using Model.Entities;
 
 namespace Model.Algo;
@@ -10,6 +9,7 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
 
     public async override Task<bool> SearchPath()
     {
+        int childrenCalculated = 0;
         PriorityQueue<(Vertice, Task<List<(Vertice, float)>>)> verticeQueue = new PriorityQueue<(Vertice, Task<List<(Vertice, float)>>)>();
         Vertice currentVertice = _graph[StartPoint];
         Task<List<(Vertice, float)>> calculateChildrenTask = Task.Run( () => CalculateChildren(currentVertice));
@@ -54,6 +54,7 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
         foreach (var adjIndex in _graph.GetAdjacentVertices(parent.OwnIndex))
         {
             Vertice child = _graph[adjIndex];
+            Interlocked.Increment(ref ChildrenCalculatedCounter);
             if (child.IsPassed)
                 continue;
 

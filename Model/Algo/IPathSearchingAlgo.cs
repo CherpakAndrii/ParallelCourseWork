@@ -4,6 +4,7 @@ namespace Model.Algo;
 
 public abstract class IPathSearchingAlgo
 {
+    public int ChildrenCalculatedCounter;
     protected int StartPoint { get; }
     protected int EndPoint { get; }
     protected Graph _graph { get; }
@@ -14,6 +15,7 @@ public abstract class IPathSearchingAlgo
         graph.SetEndPoint(finishIndex);
         graph[startpoinIndex].DistanceFromStart = 0;
         _graph = graph;
+        ChildrenCalculatedCounter = 0;
     }
 
     public abstract Task<bool> SearchPath();

@@ -35,6 +35,7 @@ public partial class Graph
         (bool[][] adjMatrix, (int, int)[] coordinates) = fileType == FileType.Text
             ? ReadFromTxtFile(sourceFilePath)
             : ReadFromBinFile(sourceFilePath);
+        Console.WriteLine("File reading done");
         Vertices = new Vertice[coordinates.Length];
         for (int i = 0; i < coordinates.Length; i++)
         {

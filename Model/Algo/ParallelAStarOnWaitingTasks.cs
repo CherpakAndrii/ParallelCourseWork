@@ -20,6 +20,7 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
 
     public async override Task<bool> SearchPath()
     {
+        int childrenCalculated = 0;
         BlockingPriorityQueue<int> verticeQueue = new BlockingPriorityQueue<int>();
         verticeQueue.Enqueue(StartPoint, 0);
         Task[] listeners = new Task[NumberOfThreads];
@@ -66,6 +67,7 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
             foreach (int adjIndex in _graph.GetAdjacentVertices(current.OwnIndex))
             {
                 Vertice child = _graph[adjIndex];
+                Interlocked.Increment(ref ChildrenCalculatedCounter);
                 if (child.TryUpdateMinRoute(current.OwnIndex))
                 {
                     lock (_queueLocker)
