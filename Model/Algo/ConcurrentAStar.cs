@@ -7,11 +7,11 @@ public class ConcurrentAStar : IPathSearchingAlgo
 {
     public ConcurrentAStar(Graph graph, int startpoinIndex, int finishIndex) : base(graph, startpoinIndex, finishIndex) { }
 
-    public async override Task<bool> SearchPath()
+    public override async Task<bool> SearchPath()
     {
         PriorityQueue<int> verticeQueue = new PriorityQueue<int>();
-        verticeQueue.Enqueue(StartPoint, 0);
         Vertice currentVertice;
+        verticeQueue.Enqueue(StartPoint, 0);
         while (verticeQueue.Count > 0)
         {
             currentVertice = _graph[verticeQueue.Dequeue()];
@@ -22,17 +22,41 @@ public class ConcurrentAStar : IPathSearchingAlgo
             if (currentVertice.OwnIndex == EndPoint)
                 return true;
 
-            foreach (int adjIndex in _graph.GetAdjacentVertices(currentVertice.OwnIndex))
+            var children = CalculateChildren(currentVertice);
+            foreach(var indDistPair in children)
             {
-                Vertice child = _graph[adjIndex];
-                ChildrenCalculatedCounter++;
-                if (child.TryUpdateMinRoute(currentVertice.OwnIndex))
+                Vertice child = indDistPair.Item1;
+                if (!child.IsPassed && child.DistanceFromStart > indDistPair.Item2)
                 {
-                    verticeQueue.Enqueue(adjIndex, child.DistanceFromStart+child.Heuristic!.Value);
+                    child.PreviousVerticeInRouteIndex = currentVertice.OwnIndex;
+                    child.DistanceFromStart = indDistPair.Item2;
+                    verticeQueue.Enqueue(child.OwnIndex,
+                            child.DistanceFromStart + child.Heuristic!.Value);
                 }
             }
         }
 
         return false;
+    }
+
+    private List<(Vertice vertice, float newDistance)> CalculateChildren(Vertice parent)
+    {
+        List<(Vertice vertice, float newDistance)> updateDistances =
+            new List<(Vertice vertice, float newDistance)>();
+        foreach (var adjIndex in _graph.GetAdjacentVertices(parent.OwnIndex))
+        {
+            Vertice child = _graph[adjIndex];
+            Interlocked.Increment(ref ChildrenCalculatedCounter);
+            if (child.IsPassed)
+                continue;
+
+            float newDistance = _graph[parent.OwnIndex, child.OwnIndex] + parent.DistanceFromStart;
+            if (child.DistanceFromStart > newDistance)
+            {
+                updateDistances.Add((child, newDistance));
+            }
+        }
+
+        return updateDistances;
     }
 }
