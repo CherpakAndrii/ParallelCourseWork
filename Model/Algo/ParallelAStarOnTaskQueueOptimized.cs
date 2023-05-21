@@ -43,25 +43,4 @@ public class ParallelAStarOnTaskQueueOptimized : IPathSearchingAlgo
 
         return false;
     }
-
-    private List<(Vertice vertice, float newDistance)> CalculateChildren(Vertice parent)
-    {
-        List<(Vertice vertice, float newDistance)> updateDistances =
-            new List<(Vertice vertice, float newDistance)>();
-        foreach (var adjIndex in _graph.GetAdjacentVertices(parent.OwnIndex))
-        {
-            Vertice child = _graph[adjIndex];
-            Interlocked.Increment(ref ChildrenCalculatedCounter);
-            if (child.IsPassed)
-                continue;
-
-            float newDistance = _graph[parent.OwnIndex, child.OwnIndex] + parent.DistanceFromStart;
-            if (child.DistanceFromStart > newDistance)
-            {
-                updateDistances.Add((child, newDistance));
-            }
-        }
-
-        return updateDistances;
-    }
 }
