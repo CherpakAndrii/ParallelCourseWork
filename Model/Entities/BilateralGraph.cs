@@ -1,13 +1,13 @@
 ﻿namespace Model.Entities;
 
-public class Graph : IGraph
+public class BilateralGraph : IGraph
 {
     public float[][] WeightMatrix { get; set; }
     public IVertice[] Vertices { get; }
     public int StartVerticeIndex { get; set; }
     public int FinishVerticeIndex { get; set; }
 
-    public Graph(int size)
+    public BilateralGraph(int size)
     {
         if (size < 3)
             throw new ArgumentException("The graph must contain at least 3 vertices!");
@@ -25,16 +25,16 @@ public class Graph : IGraph
         Parallel.ForEach(Vertices, v => v.Reset());
     }
 
-    public Graph(string sourceFilePath, IGraph.FileType fileType)
+    public BilateralGraph(string sourceFilePath, IGraph.FileType fileType)
     {
         (bool[][] adjMatrix, (int, int)[] coordinates) = fileType == IGraph.FileType.Text
             ? IGraph.ReadFromTxtFile(sourceFilePath)
             : IGraph.ReadFromBinFile(sourceFilePath);
         Console.WriteLine("File reading done");
-        Vertices = new Vertice[coordinates.Length];
+        Vertices = new BilateralVertice?[coordinates.Length];
         for (int i = 0; i < coordinates.Length; i++)
         {
-            Vertices[i] = new Vertice(this, i, coordinates[i]);
+            Vertices[i] = new BilateralVertice(this, i, coordinates[i]);
         }
         WeightMatrix = IGraph.BuildWeightMatrix(Vertices, adjMatrix);
     }
@@ -67,7 +67,15 @@ public class Graph : IGraph
         }
     }
 
-    public Graph(IGraph original)
+    public void SetStartEndPoint(int startPointIndex, int endPointIndex)
+    {
+        FinishVerticeIndex = endPointIndex;
+        IVertice finish = Vertices[endPointIndex];
+        IVertice start = Vertices[startPointIndex];
+        Parallel.ForEach(Vertices, vertice => vertice.SetHeuristic(start, finish));
+    }
+
+    public BilateralGraph(BilateralGraph original)
     {
         WeightMatrix = original.WeightMatrix;
         Vertices = new IVertice[original.Vertices.Length];
@@ -75,14 +83,6 @@ public class Graph : IGraph
         {
             Vertices[i] = original.Vertices[i].Copy();
         }
-    }
-
-    public void SetStartEndPoint(int startPoint, int endPointIndex)
-    {
-        FinishVerticeIndex = endPointIndex;
-        IVertice finish = Vertices[endPointIndex];
-        IVertice start = Vertices[startPoint];
-        Parallel.ForEach(Vertices, vertice => vertice.SetHeuristic(start, finish));
     }
 
     private bool IndexIsInRange(int index) => index >= 0 && index < WeightMatrix.Length;

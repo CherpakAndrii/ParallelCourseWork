@@ -3,16 +3,15 @@ using Model.Entities;
 
 namespace Model.Algo;
 
-public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
+public class ParallelAStarOnTaskQueue : ISingleSidePathSearchingAlgo
 {
     public ParallelAStarOnTaskQueue(Graph graph, int startpoinIndex, int finishIndex) : base(graph, startpoinIndex, finishIndex) { }
 
-    public async override Task<bool> SearchPath()
+    public override async Task<IVertice?> SearchPath()
     {
-        int childrenCalculated = 0;
-        PriorityQueue<(Vertice, Task<List<(Vertice, float)>>)> verticeQueue = new PriorityQueue<(Vertice, Task<List<(Vertice, float)>>)>();
-        Vertice currentVertice = _graph[StartPoint];
-        Task<List<(Vertice, float)>> calculateChildrenTask = Task.Run( () => CalculateChildren(currentVertice));
+        PriorityQueue<(Vertice, Task<List<(Vertice, float)>>?)> verticeQueue = new PriorityQueue<(Vertice, Task<List<(Vertice, float)>>?)>();
+        Vertice currentVertice = (Vertice)_graph[StartPoint];
+        Task<List<(Vertice, float)>>? calculateChildrenTask = Task.Run( () => CalculateChildren(currentVertice));
         verticeQueue.Enqueue((currentVertice, calculateChildrenTask), 0);
         while (verticeQueue.Count > 0)
         {
@@ -22,49 +21,26 @@ public class ParallelAStarOnTaskQueue : IPathSearchingAlgo
             
             currentVertice.IsPassed = true;
             if (currentVertice.OwnIndex == EndPoint)
-                return true;
+                return currentVertice;
 
-            var children = await calculateChildrenTask;
-            Parallel.ForEach(children, indDistPair =>
+            var children = (calculateChildrenTask is not null? await calculateChildrenTask : CalculateChildren(currentVertice));
+            var minPriorPair = children.MinBy(p => p.Item1.Heuristic!.Value + p.Item2);
+            float minPrior = minPriorPair.Item1.Heuristic!.Value + minPriorPair.Item2;
+            foreach (var pair in children)
             {
-                Vertice child = indDistPair.Item1;
-                lock (child)
-                    if (!child.IsPassed && child.DistanceFromStart > indDistPair.Item2)
-                    {
-                        child.PreviousVerticeInRouteIndex = currentVertice.OwnIndex;
-                        child.DistanceFromStart = indDistPair.Item2;
-                        Task<List<(Vertice, float)>> calculateNextChildrenTask =
-                            Task.Run(() => CalculateChildren(indDistPair.Item1));
-                        lock (verticeQueue)
-                        {
-                            verticeQueue.Enqueue((indDistPair.Item1, calculateNextChildrenTask),
-                                child.DistanceFromStart + child.Heuristic!.Value);
-                        }
-                    }
-            });
-        }
-
-        return false;
-    }
-
-    private List<(Vertice vertice, float newDistance)> CalculateChildren(Vertice parent)
-    {
-        List<(Vertice vertice, float newDistance)> updateDistances =
-            new List<(Vertice vertice, float newDistance)>();
-        foreach (var adjIndex in _graph.GetAdjacentVertices(parent.OwnIndex))
-        {
-            Vertice child = _graph[adjIndex];
-            Interlocked.Increment(ref ChildrenCalculatedCounter);
-            if (child.IsPassed)
-                continue;
-
-            float newDistance = _graph[parent.OwnIndex, child.OwnIndex] + parent.DistanceFromStart;
-            if (child.DistanceFromStart > newDistance)
-            {
-                updateDistances.Add((child, newDistance));
+                Vertice child = pair.Item1;
+                if (!child.IsPassed && child.DistanceFromStart > pair.Item2)
+                {
+                    child.PreviousVerticeInRouteIndex = currentVertice.OwnIndex;
+                    child.DistanceFromStart = pair.Item2;
+                    float prior = child.Heuristic!.Value + pair.Item2;
+                    Task<List<(Vertice, float)>>? calculateNextChildrenTask =
+                        prior <= minPrior+1 ? Task.Run(() => CalculateChildren(child)) : null;
+                    verticeQueue.Enqueue((child, calculateNextChildrenTask), prior);
+                }
             }
         }
 
-        return updateDistances;
+        return null;
     }
 }

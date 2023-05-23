@@ -2,7 +2,7 @@
 
 namespace Model.Entities;
 
-public partial class Graph
+public partial interface IGraph
 {
     public void SaveToTextFile(string filePath)
     {

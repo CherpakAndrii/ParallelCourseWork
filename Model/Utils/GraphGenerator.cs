@@ -27,7 +27,7 @@ public static class GraphGenerator
         return matrix;
     }
 
-    public static Vertice[] GenerateVertices(int verticeNumber, Graph graph)
+    public static Vertice[] GenerateVertices(int verticeNumber, IGraph graph)
     {
         Vertice[] vertices = new Vertice[verticeNumber];
         Random random = new Random();

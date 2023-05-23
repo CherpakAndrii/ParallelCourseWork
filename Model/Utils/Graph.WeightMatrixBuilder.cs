@@ -1,8 +1,8 @@
 ﻿namespace Model.Entities;
 
-public partial class Graph
+public partial interface IGraph
 {
-    private static float[][] BuildWeightMatrix(Vertice[] vertices, bool[][] adjacensematrix)
+    protected static float[][] BuildWeightMatrix(IVertice[] vertices, bool[][] adjacensematrix)
     {
         int size = vertices.Length;
         float[][] weights = new float[size][];
@@ -18,6 +18,6 @@ public partial class Graph
         return weights;
     }
     
-    private static float GetDistance(Vertice v1, Vertice v2) => (float)Math.Sqrt(Math.Pow(v1.VerticeCoordinates.X - v2.VerticeCoordinates.X, 2) +
+    private static float GetDistance(IVertice v1, IVertice v2) => (float)Math.Sqrt(Math.Pow(v1.VerticeCoordinates.X - v2.VerticeCoordinates.X, 2) +
                                                                            Math.Pow(v1.VerticeCoordinates.Y - v2.VerticeCoordinates.Y, 2));
 }

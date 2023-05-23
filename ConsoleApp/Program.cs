@@ -8,37 +8,52 @@ public static class Program
 {
     public static async Task Main()
     {
-        Graph g = new Graph("saved.grph", Graph.FileType.Binary);//new Graph(50000);
+        Graph g = new Graph("saved.grph", IGraph.FileType.Binary);//new Graph(50000);
         // g.SaveToBinFile("saved.grph");
+        BilateralGraph bg = new BilateralGraph("saved.grph", IGraph.FileType.Binary);
+
+        Console.WriteLine("Building graphs done\n\n-----------------------------Testing:-------------------------");
+        
         int s = 0, f = 6789;
         IPathSearchingAlgo algo = new ConcurrentAStar(g, s, f);
-        await TestAlgo(algo, g, f);
-        /*g.Reset();
+        await TestAlgo(algo, "Concurrent A*", true);
+        g.Reset();
         algo = new ConcurrentAStarWithParallelFor(g, s, f);
-        await TestAlgo(algo, g, f);
+        await TestAlgo(algo, "A* with ParallelFor");
         g.Reset();
         algo = new ParallelAStarOnWaitingTasks(g, s, f);
-        await TestAlgo(algo, g, f);
+        await TestAlgo(algo, "Parallel A* on waiting tasks");
         g.Reset();
         algo = new ParallelAStarOnTaskQueue(g, s, f);
-        await TestAlgo(algo, g, f);*/
+        await TestAlgo(algo, "Parallel A* with task queueing");
         g.Reset();
-        algo = new ParallelAStarOnTaskQueueOptimized(g, s, f);
-        await TestAlgo(algo, g, f);
+        algo = new BilateralAStar(bg, s, f);
+        await TestAlgo(algo, "Bilateral A*");
     }
 
-    static async Task TestAlgo(IPathSearchingAlgo algo, Graph g, int f)
+    public static async Task TestAlgo(IPathSearchingAlgo algo, string algoName, bool printAllPath = false)
     {
         Stopwatch sw = Stopwatch.StartNew();
-        bool found = await algo.SearchPath();
+        IVertice? found = await algo.SearchPath();
         sw.Stop();
         
-        if (found)
+        if (found is not null)
         {
-            var route = algo.TraceRoute();
-            Console.WriteLine($"found: {g[f].DistanceFromStart} ({route.Count}) in {sw.ElapsedMilliseconds}ms with {algo.ChildrenCalculatedCounter} vertices touched");
+            var route = algo.TraceRoute(found);
+            Console.WriteLine($"Path found by {algoName}:\n\t{algo.GetDistance(found)} (through {route.Count} vertices) in {sw.ElapsedMilliseconds}ms with {algo.ChildrenCalculatedCounter} vertices touched for graph {algo.GetGraphSize()}x{algo.GetGraphSize()}");
+            if (printAllPath)
+            {
+                Console.Write('\t');
+                Console.Write(route.Pop());
+                while (route.Count > 0)
+                {
+                    Console.Write(" --> "+route.Pop());
+                }
+
+                Console.WriteLine('\n');
+            }
         }
         else
-            Console.WriteLine($"Not found in {sw.ElapsedMilliseconds}ms with {algo.ChildrenCalculatedCounter} vertices touched");
+            Console.WriteLine($"Path not found by {algoName} in {sw.ElapsedMilliseconds}ms with {algo.ChildrenCalculatedCounter} vertices touched for graph {algo.GetGraphSize()}x{algo.GetGraphSize()}");
     }
 }

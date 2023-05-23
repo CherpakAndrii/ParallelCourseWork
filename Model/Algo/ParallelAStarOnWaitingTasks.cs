@@ -3,7 +3,7 @@ using Model.Entities;
 
 namespace Model.Algo;
 
-public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
+public class ParallelAStarOnWaitingTasks : ISingleSidePathSearchingAlgo
 {
     public bool PathFound { get; set; }
     public byte NumberOfThreads { get; }
@@ -18,7 +18,7 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
         _queueLocker = new();
     }
 
-    public async override Task<bool> SearchPath()
+    public override async Task<IVertice> SearchPath()
     {
         int childrenCalculated = 0;
         BlockingPriorityQueue<int> verticeQueue = new BlockingPriorityQueue<int>();
@@ -31,7 +31,7 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
 
         await Task.WhenAll(listeners);
 
-        return PathFound;
+        return PathFound? (Vertice)_graph[EndPoint] : null;
     }
 
     private async Task ListenQueue(BlockingPriorityQueue<int> queue)
@@ -46,7 +46,7 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
                     Monitor.Wait(_queueLocker);
                     continue;
                 }
-                current = _graph[queue.Dequeue()];
+                current = (Vertice)_graph[queue.Dequeue()];
                 Interlocked.Increment(ref _workingTasks);
             }
 
@@ -66,7 +66,7 @@ public class ParallelAStarOnWaitingTasks : IPathSearchingAlgo
 
             foreach (int adjIndex in _graph.GetAdjacentVertices(current.OwnIndex))
             {
-                Vertice child = _graph[adjIndex];
+                Vertice child = (Vertice)_graph[adjIndex];
                 Interlocked.Increment(ref ChildrenCalculatedCounter);
                 if (child.TryUpdateMinRoute(current.OwnIndex))
                 {

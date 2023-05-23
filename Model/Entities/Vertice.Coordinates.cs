@@ -1,22 +1,19 @@
 ﻿namespace Model.Entities;
 
-public partial class Vertice
+public class Coordinates
 {
-    public class Coordinates
+    public int X { get; }
+    public int Y { get; }
+
+    public Coordinates(int x, int y)
     {
-        public int X { get; }
-        public int Y { get; }
+        X = x;
+        Y = y;
+    }
 
-        public Coordinates(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        public Coordinates((int x, int y) coors)
-        {
-            X = coors.x;
-            Y = coors.y;
-        }
+    public Coordinates((int x, int y) coors)
+    {
+        X = coors.x;
+        Y = coors.y;
     }
 }
