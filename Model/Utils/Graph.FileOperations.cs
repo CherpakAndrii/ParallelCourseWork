@@ -4,10 +4,10 @@ namespace Model.Entities;
 
 public partial interface IGraph
 {
-    public void SaveToTextFile(string filePath)
+    public static void SaveToTextFile(string filePath, IGraph graph)
     {
         StringBuilder fileContent = new StringBuilder();
-        foreach (var row in WeightMatrix)
+        foreach (var row in graph.WeightMatrix)
         {
             foreach (var element in row)
             {
@@ -19,7 +19,7 @@ public partial interface IGraph
 
         fileContent.Append("////\n");
 
-        foreach (var v in Vertices)
+        foreach (var v in graph.Vertices)
         {
             fileContent.Append($"{v.VerticeCoordinates.X}:{v.VerticeCoordinates.Y},");
         }
@@ -27,19 +27,19 @@ public partial interface IGraph
         File.WriteAllText(filePath, fileContent.ToString());
     }
     
-    public void SaveToBinFile(string filePath)
+    public static void SaveToBinFile(string filePath, IGraph graph)
     {
-        int graphSize = Vertices.Length;
+        int graphSize = graph.Vertices.Length;
         BinaryWriter fileContent = new BinaryWriter(new FileStream(filePath, FileMode.Create));
         fileContent.Write(graphSize);
-        foreach (var row in WeightMatrix)
+        foreach (var row in graph.WeightMatrix)
         {
             foreach (var element in row)
             {
                 fileContent.Write((byte)(element == -1 ? 0 : 1));
             }
         }
-        foreach (var v in Vertices)
+        foreach (var v in graph.Vertices)
         {
             fileContent.Write(v.VerticeCoordinates.X);
             fileContent.Write(v.VerticeCoordinates.Y);

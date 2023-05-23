@@ -9,7 +9,7 @@ public static class Program
     public static async Task Main()
     {
         Graph g = new Graph("saved.grph", IGraph.FileType.Binary);//new Graph(50000);
-        // g.SaveToBinFile("saved.grph");
+        // IGraph.SaveToBinFile("saved.grph", g);
         BilateralGraph bg = new BilateralGraph("saved.grph", IGraph.FileType.Binary);
 
         Console.WriteLine("Building graphs done\n\n-----------------------------Testing:-------------------------");
