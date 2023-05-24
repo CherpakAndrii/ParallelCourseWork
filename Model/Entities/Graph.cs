@@ -14,7 +14,7 @@ public class Graph : IGraph
 
         Vertices = GraphGenerator.GenerateVertices(size, this);
         Console.WriteLine("Vertices generated!");
-        bool[][] _adjMatrix = GraphGenerator.GenerateAdjacenceMatrix(size, 0.3f);
+        bool[][] _adjMatrix = GraphGenerator.GenerateAdjacenceMatrix(size, size < 1000? 0.3f : 0.01f);
         Console.WriteLine("Adj matrix generated!");
         WeightMatrix = IGraph.BuildWeightMatrix(Vertices, _adjMatrix);
         Console.WriteLine("Weight matrix built!");
@@ -37,19 +37,6 @@ public class Graph : IGraph
             Vertices[i] = new Vertice(this, i, coordinates[i]);
         }
         WeightMatrix = IGraph.BuildWeightMatrix(Vertices, adjMatrix);
-    }
-
-    public IEnumerable<int> GetAdjacentVertices(int fromVertice, int indexLimit = int.MaxValue)
-    {
-        if (!IndexIsInRange(fromVertice))
-            throw new IndexOutOfRangeException("Vertice index is out of matrix");
-
-        var targetRow = WeightMatrix[fromVertice];
-        for (int i = 0; i < targetRow.Length && i < indexLimit; i++)
-        {
-            if (targetRow[i] >= 0)
-                yield return i;
-        }
     }
 
     public IVertice this[int ind]

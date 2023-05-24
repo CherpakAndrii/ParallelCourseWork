@@ -24,6 +24,8 @@ public class ParallelAStarOnTaskQueue : ISingleSidePathSearchingAlgo
                 return currentVertice;
 
             var children = (calculateChildrenTask is not null? await calculateChildrenTask : CalculateChildren(currentVertice));
+            if (children.Count == 0)
+                continue;
             var minPriorPair = children.MinBy(p => p.Item1.Heuristic!.Value + p.Item2);
             float minPrior = minPriorPair.Item1.Heuristic!.Value + minPriorPair.Item2;
             foreach (var pair in children)

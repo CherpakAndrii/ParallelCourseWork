@@ -39,19 +39,6 @@ public class BilateralGraph : IGraph
         WeightMatrix = IGraph.BuildWeightMatrix(Vertices, adjMatrix);
     }
 
-    public IEnumerable<int> GetAdjacentVertices(int fromVertice, int indexLimit = int.MaxValue)
-    {
-        if (!IndexIsInRange(fromVertice))
-            throw new IndexOutOfRangeException("Vertice index is out of matrix");
-
-        var targetRow = WeightMatrix[fromVertice];
-        for (int i = 0; i < targetRow.Length && i < indexLimit; i++)
-        {
-            if (targetRow[i] >= 0)
-                yield return i;
-        }
-    }
-
     public IVertice this[int ind]
     {
         get => Vertices[ind];

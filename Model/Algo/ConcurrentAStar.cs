@@ -5,10 +5,7 @@ namespace Model.Algo;
 
 public class ConcurrentAStar : ISingleSidePathSearchingAlgo
 {
-    public ConcurrentAStar(Graph graph, int startpoinIndex, int finishIndex) : base(graph, startpoinIndex, finishIndex)
-    {
-        
-    }
+    public ConcurrentAStar(Graph graph, int startpoinIndex, int finishIndex) : base(graph, startpoinIndex, finishIndex) { }
 
     public override async Task<IVertice?> SearchPath()
     {

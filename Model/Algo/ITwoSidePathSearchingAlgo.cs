@@ -37,28 +37,7 @@ public abstract class ITwoSidePathSearchingAlgo: IPathSearchingAlgo
 
         return route;
     }
-    
-    protected List<(BilateralVertice vertice, float newDistance)> CalculateChildren(BilateralVertice parent, int processInd)
-    {
-        List<(BilateralVertice vertice, float newDistance)> updateDistances =
-            new List<(BilateralVertice vertice, float newDistance)>();
-        foreach (var adjIndex in _graph.GetAdjacentVertices(parent.OwnIndex))
-        {
-            BilateralVertice child = (BilateralVertice)_graph[adjIndex];
-            Interlocked.Increment(ref ChildrenCalculatedCounter);
-            if (child.IsPassed[processInd])
-                continue;
 
-            float newDistance = _graph[parent.OwnIndex, child.OwnIndex] + parent.DistanceFromStart[processInd];
-            if (child.DistanceFromStart[processInd] > newDistance)
-            {
-                updateDistances.Add((child, newDistance));
-            }
-        }
-
-        return updateDistances;
-    }
-    
     public override float GetDistance(IVertice lastVertice)
     {
         return ((BilateralVertice)lastVertice).DistanceFromStart.Sum();

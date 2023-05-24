@@ -7,14 +7,14 @@ public class Vertice : IVertice
     public float? Heuristic { get; private set; }
     public int PreviousVerticeInRouteIndex { get; set; }
     public bool IsPassed;
-    
+
     public int OwnIndex { get; }
     private IGraph Graph { get; }
 
     public Vertice(IGraph graph, int ownIndex, (int x, int y) coordinates)
     {
         VerticeCoordinates = new Coordinates(coordinates);
-        DistanceFromStart = float.MaxValue/2;
+        DistanceFromStart = float.MaxValue / 2;
         PreviousVerticeInRouteIndex = -1;
         IsPassed = false;
         OwnIndex = ownIndex;
@@ -29,7 +29,8 @@ public class Vertice : IVertice
     public void SetHeuristic(IVertice start, IVertice finish)
     {
         Heuristic = (float)Math.Sqrt(Math.Pow(VerticeCoordinates.X - finish.VerticeCoordinates.X, 2) +
-                                     Math.Pow(VerticeCoordinates.Y - finish.VerticeCoordinates.Y, 2));    }
+                                     Math.Pow(VerticeCoordinates.Y - finish.VerticeCoordinates.Y, 2));
+    }
 
     public bool TryUpdateMinRoute(int fromVerticeIndex)
     {
@@ -46,6 +47,7 @@ public class Vertice : IVertice
                 return true;
             }
         }
+
         return false;
     }
 

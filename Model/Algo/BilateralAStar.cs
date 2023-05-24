@@ -11,14 +11,14 @@ public class BilateralAStar : ITwoSidePathSearchingAlgo
     public override async Task<IVertice?> SearchPath()
     {
         List<Task<bool>> searchTasks = new List<Task<bool>>();
-        searchTasks.Add(Task.Run(() => SingleSidePathSearching(0)));
-        searchTasks.Add(Task.Run(() => SingleSidePathSearching(1)));
+        searchTasks.Add(Task.Run(() => SingleThreadPathSearching(0)));
+        searchTasks.Add(Task.Run(() => SingleThreadPathSearching(1)));
 
         await Task.WhenAny(searchTasks);
         return meet;
     }
 
-    public async Task<bool> SingleSidePathSearching(int procInd)
+    public async Task<bool> SingleThreadPathSearching(int procInd)
     {
         PriorityQueue<int> verticeQueue = new PriorityQueue<int>();
         BilateralVertice currentVertice;
@@ -32,7 +32,8 @@ public class BilateralAStar : ITwoSidePathSearchingAlgo
             currentVertice.IsPassed[procInd] = true;
             if (currentVertice.IsPassed[(procInd+1)%2])
             {
-                meet = currentVertice;
+                if (meet is null || meet.DistanceFromStart.Sum() > currentVertice.DistanceFromStart.Sum())
+                    meet = currentVertice;
                 return true;
             }
 
